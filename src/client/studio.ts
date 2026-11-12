@@ -8,7 +8,7 @@ type State = {
   entries: Entry[];
   run: "idle" | "running" | "paused";
   selected?: string;
-  capabilities?: { formats: Format[]; gpu: boolean };
+  capabilities?: { formats: Format[]; gpu: boolean } | null;
   notice?: { text: string; key: number };
   remaining: number | null;
 };
@@ -50,7 +50,9 @@ export class Studio {
 
   connect = () => {
     this.#stopped = false;
-    void this.#pump();
+    // React may replay this subscription during development before the first paint.
+    // Defer worker startup until that replay has finished.
+    queueMicrotask(() => { if (!this.#stopped) void this.#pump(); });
     return () => {
       this.#stopped = true;
       this.#processor.stop();
@@ -126,6 +128,7 @@ export class Studio {
         } catch (error) {
           if (this.#stopped) return;
           this.#checked = true;
+          this.#set({ capabilities: null });
           this.notify(error instanceof Error ? error.message : "This browser does not support image processing.");
         }
       }
@@ -170,7 +173,7 @@ export class Studio {
           }
           continue;
         }
-        if (run === "running") {
+        if (run === "running" || (run === "paused" && !entries.some(item => item.status === "ready"))) {
           const done = entries.filter(item => item.status === "done").length;
           const failed = entries.filter(item => item.status === "failed").length;
           this.#set({ run: "idle" });
