@@ -14,25 +14,31 @@ export const AI_MAX_PIXELS = 3_000_000;
 
 export async function gpuAvailable() {
   const nav = navigator as Navigator & { gpu?: { requestAdapter(): Promise<unknown> } };
-  try { return Boolean(await nav.gpu?.requestAdapter()); } catch { return false; }
+  if (!nav.gpu) return false;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  try {
+    const timeout = new Promise<null>(resolve => { timer = setTimeout(() => resolve(null), 3000); });
+    return Boolean(await Promise.race([nav.gpu.requestAdapter(), timeout]));
+  } catch { return false; }
+  finally { clearTimeout(timer); }
 }
 
 async function verifiedBytes(response: Response, report: Progress): Promise<ArrayBuffer> {
   if (!response.ok) throw new Error("The model host returned HTTP " + response.status + ".");
   const expected = Number(response.headers.get("content-length"));
-  if (expected > model.maxBytes) throw new Error("Model download exceeded its size limit.");
+  if (expected > model.bytes && !response.headers.has("content-encoding")) throw new Error("Model download exceeded its size limit.");
   const reader = response.body?.getReader();
   if (!reader) throw new Error("Streaming model downloads are unavailable in this browser.");
-  const chunks: Uint8Array[] = [];
+  const bytes = new Uint8Array(model.bytes);
   let total = 0;
   try {
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
+      if (value.byteLength > bytes.length - total) throw new Error("Model download exceeded its size limit.");
+      bytes.set(value, total);
       total += value.byteLength;
-      if (total > model.maxBytes) throw new Error("Model download exceeded its size limit.");
-      chunks.push(value);
-      report(0.08 + 0.22 * Math.min(1, total / (expected || model.maxBytes)), "Downloading Real-ESRGAN model");
+      report(0.08 + 0.22 * total / model.bytes, "Downloading Real-ESRGAN model");
     }
   } catch (error) {
     await reader.cancel().catch(() => {});
@@ -40,9 +46,7 @@ async function verifiedBytes(response: Response, report: Progress): Promise<Arra
   } finally {
     reader.releaseLock();
   }
-  const bytes = new Uint8Array(total);
-  let offset = 0;
-  for (const chunk of chunks) { bytes.set(chunk, offset); offset += chunk.length; }
+  if (total !== bytes.length) throw new Error("The model failed its integrity check.");
   const digest = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", bytes)), b => b.toString(16).padStart(2, "0")).join("");
   if (digest !== model.sha256) throw new Error("The model failed its integrity check.");
   return bytes.buffer;
@@ -59,9 +63,14 @@ async function weights(report: Progress): Promise<ArrayBuffer> {
     } catch { await cache?.delete(cacheKey).catch(() => {}); }
   }
   report(0.08, "Downloading Real-ESRGAN model");
-  const response = await fetch(model.url, {
-    credentials: "omit", referrerPolicy: "no-referrer", signal: AbortSignal.timeout(180_000),
-  });
+  let response: Response;
+  try {
+    response = await fetch(model.url, {
+      credentials: "omit", referrerPolicy: "no-referrer", signal: AbortSignal.timeout(180_000),
+    });
+  } catch {
+    throw new Error("Could not reach the model host. Check your connection and retry, or switch to Fast Resize.");
+  }
   const bytes = await verifiedBytes(response, report);
   if (cache) await cache.put(cacheKey, new Response(bytes)).catch(() => {});
   return bytes;
@@ -136,6 +145,7 @@ async function release() {
 }
 
 export async function upscale(input: Uint8ClampedArray, source: Dimensions, report: Progress) {
+  if (!self.isSecureContext || !crypto.subtle) throw new Error("AI requires HTTPS or localhost to verify the model download.");
   assertDimensions(source, AI_MAX_PIXELS);
   const size = { width: source.width * 2, height: source.height * 2 };
   assertDimensions(size);
