@@ -11,3 +11,5 @@ The first AI run requests a pinned public model from Hugging Face. The request u
 ZIP output uses stored entries because the image files are already encoded. Each blob is read as a stream, and the next chunk is consumed only after the destination accepts the previous one. The directory layout is preserved after removing traversal components and replacing invalid filename characters. Originals are never edited in place.
 
 Browser encoders re-encode pixels and can change color profiles or metadata. The app does not preserve EXIF, GPS, or camera metadata. Source format detection does not depend on filenames or declared MIME types. Unsupported animation is rejected rather than converted to a still. Optional denoise and HEIC/HEIF are not included.
+
+The AVIF fallback uses the single-threaded encoder from [jSquash](https://github.com/jamsinclair/jSquash/tree/main/packages/avif) (Apache 2.0), built with [libavif](https://github.com/AOMediaCodec/libavif). The worker verifies the fallback by encoding a tiny image before enabling the format. The application serves the codec and its license from the same origin.

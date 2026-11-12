@@ -22,7 +22,7 @@ npm run test:e2e
 npm run build
 ```
 
-The AI browser test is opt-in because it downloads roughly 64 MB of weights and loads WebAssembly. Enable it with `PIXELFORGE_TEST_AI=1` when running Playwright. See [testing](docs/testing.md) for exact commands and local model fixtures.
+The AI browser test is opt-in because it downloads roughly 64 MiB of weights and loads WebAssembly. Enable it with `PIXELFORGE_TEST_AI=1` when running Playwright. See [testing](docs/testing.md) for exact commands and local model fixtures.
 
 ## What works where
 
@@ -31,7 +31,7 @@ The AI browser test is opt-in because it downloads roughly 64 MB of weights and 
 | Fast Resize | Alpha-aware Lanczos, with optional sharpening of opaque details. Choose original size for conversion only. |
 | AI Upscale | Real-ESRGAN x2plus performs one native 2× pass. For other target sizes, Lanczos resamples the model result. WebGPU is attempted when available; WASM is the fallback. |
 | Input | Static JPG, PNG, WebP and AVIF, when the browser can decode them. Animated images, GIF, SVG, HEIC and HEIF are rejected. |
-| Output | JPG, PNG, WebP and AVIF where the browser exposes a matching encoder. The app checks the encoder's returned MIME type. Transparent inputs require explicit permission before flattening to a white JPG background. |
+| Output | JPG, PNG, and WebP through browser encoders. AVIF uses native encoding when available and otherwise a tested libavif WebAssembly encoder, limited to 6 megapixels. Transparent inputs require explicit permission before flattening to a white JPG background. |
 | Folders | Pick or drop folders on supported browsers. ZIP exports preserve nested paths and add suffixes when names collide. |
 | Batch control | Pause after the current file, resume, or cancel the active job. Retrying puts failed or cancelled files back in the queue; start again with the settings you want. |
 | Local storage | Settings, theme, and verified model weights may persist. The queue, source files, and results clear on reload. |
