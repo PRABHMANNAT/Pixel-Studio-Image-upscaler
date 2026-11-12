@@ -1,0 +1,12 @@
+node_modules/
+.next/
+out/
+public/pixelforge/
+*.tsbuildinfo
+playwright-report/
+test-results/
+coverage/
+.vercel/
+.env*
+.npm-cache/
+next-env.d.ts
