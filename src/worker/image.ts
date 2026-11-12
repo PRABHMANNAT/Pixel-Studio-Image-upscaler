@@ -1,8 +1,9 @@
 import { inspectBytes } from "../core/format";
 import { lanczos, sharpenPixels } from "../core/resize";
-import { assertDimensions, formats, MAX_INPUT_BYTES, targetSize, type Dimensions, type Format, type Settings } from "../core/settings";
+import { assertDimensions, MAX_INPUT_BYTES, targetSize, type Dimensions, type Settings } from "../core/settings";
 import type { Inspection, Product } from "../core/protocol";
 import { upscale } from "./ai";
+import { assertEncoderTarget, encode, encoders } from "./codecs";
 
 type Progress = (value: number, phase: string) => void;
 
@@ -44,18 +45,6 @@ export async function inspect(file: File): Promise<Inspection> {
   } finally { bitmap.close(); }
 }
 
-let supported: Format[] | undefined;
-export async function encoders() {
-  if (supported) return supported;
-  const { canvas, ctx } = surface(2, 2);
-  ctx.fillRect(0, 0, 2, 2);
-  const results = await Promise.all(formats.map(async type => {
-    try { return (await canvas.convertToBlob({ type })).type === type ? type : null; }
-    catch { return null; }
-  }));
-  return supported = results.filter((format): format is Format => format !== null);
-}
-
 export async function processImage(file: File, settings: Settings, report: Progress): Promise<Product> {
   report(0.02, "Decoding source");
   const { bitmap, format } = await decoded(file);
@@ -66,6 +55,7 @@ export async function processImage(file: File, settings: Settings, report: Progr
   try {
     target = targetSize(source, settings);
     if (!(await encoders()).includes(type)) throw new Error("This browser cannot encode the selected format. Choose a different output format.");
+    assertEncoderTarget(type, target.width * target.height);
     if (settings.mode === "ai" && target.width <= source.width && target.height <= source.height) {
       throw new Error("AI Upscale needs a larger target. Use Fast Resize for conversion at the original size.");
     }
@@ -106,10 +96,10 @@ export async function processImage(file: File, settings: Settings, report: Progr
     }
   }
   try {
-    ctx.putImageData(new ImageData(pixels as Uint8ClampedArray<ArrayBuffer>, target.width, target.height), 0, 0);
+    const image = new ImageData(pixels as Uint8ClampedArray<ArrayBuffer>, target.width, target.height);
+    ctx.putImageData(image, 0, 0);
     report(0.94, "Encoding output");
-    const blob = await canvas.convertToBlob({ type, quality: settings.quality });
-    if (blob.type !== type || !blob.size) throw new Error("The browser did not produce the requested file format.");
+    const blob = await encode(canvas, image, type, settings.quality);
     return { ...target, format: type, blob, preview: await preview(canvas, 1600), provider };
   } finally { canvas.width = canvas.height = 1; }
 }

@@ -1,6 +1,7 @@
 import type { Reply, Request } from "../core/protocol";
 import { gpuAvailable } from "./ai";
-import { encoders, inspect, processImage } from "./image";
+import { encoders } from "./codecs";
+import { inspect, processImage } from "./image";
 
 const send = (message: Reply) => self.postMessage(message);
 

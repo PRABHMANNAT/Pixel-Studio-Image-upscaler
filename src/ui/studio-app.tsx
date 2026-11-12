@@ -96,7 +96,7 @@ export function StudioApp() {
       <details id="privacy" className="privacy panel">
         <summary><CircleAlert size={17} /> Privacy and compatibility</summary>
         <p>Images and exports stay in this tab. Only your settings and the verified AI model are saved locally; reloading clears the queue. AI mode downloads the model from Hugging Face, which receives a normal download request and no image data.</p>
-        <p>Use a recent browser with workers and OffscreenCanvas. AVIF export appears only when an encoder is detected. Animated images and HEIC/HEIF are unsupported. Working limits depend on pixel count, format, and available memory.</p>
+        <p>Use a recent browser with workers and OffscreenCanvas. AVIF export requires a native or WebAssembly encoder. The WebAssembly encoder supports up to 6 megapixels. Animated images and HEIC/HEIF are unsupported.</p>
       </details>
     </main>
     {state.notice && <div className="toast" role="status"><span>{state.notice.text}</span><Button size="icon" variant="ghost" aria-label="Dismiss message" onClick={studio.dismiss}><X size={16} /></Button></div>}
