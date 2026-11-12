@@ -24,12 +24,12 @@ export async function downloaded(download: Download) {
   return Buffer.concat(chunks);
 }
 
-export async function alphaAt(page: Page, bytes: Buffer, x: number, y: number) {
-  return page.evaluate(async ({ url, x, y }) => {
-    const image = await createImageBitmap(await (await fetch(url)).blob());
+export async function readPixels(page: Page, bytes: Buffer, x = 0, y = 0, width?: number, height?: number) {
+  return page.evaluate(async ({ base64, x, y, width, height }) => {
+    const image = await createImageBitmap(new Blob([Uint8Array.from(atob(base64), char => char.charCodeAt(0))], { type: "image/png" }));
     const canvas = new OffscreenCanvas(image.width, image.height);
     const ctx = canvas.getContext("2d")!;
     ctx.drawImage(image, 0, 0);
-    return ctx.getImageData(x, y, 1, 1).data[3];
-  }, { url: "data:image/png;base64," + bytes.toString("base64"), x, y });
+    return [...ctx.getImageData(x, y, width ?? image.width, height ?? image.height).data];
+  }, { base64: bytes.toString("base64"), x, y, width, height });
 }

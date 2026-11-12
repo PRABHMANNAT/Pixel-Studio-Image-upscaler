@@ -3,16 +3,20 @@ import { join } from "node:path";
 import { test, expect } from "@playwright/test";
 import { unzipSync } from "fflate";
 import { inspectBytes } from "../../src/core/format";
-import { alphaAt, downloaded, png } from "./fixtures";
+import { downloaded, png, readPixels } from "./fixtures";
 
-test("launches from the landing page and produces a valid resized JPG locally", async ({ page }) => {
-  const outbound: string[] = [];
-  page.on("request", request => {
-    if (request.url().startsWith("http") && (!request.url().startsWith("http://localhost:3200/") || request.method() !== "GET")) outbound.push(request.url());
-  });
+test("launches from the landing page and produces a valid resized JPG locally", async ({ page, context }) => {
   await page.goto("/");
   await page.getByRole("link", { name: "Open image studio" }).click();
   await expect(page.getByRole("heading", { name: "Image studio" })).toBeVisible();
+  const outbound: string[] = [];
+  context.on("request", request => {
+    if (!request.url().startsWith("http")) return;
+    const own = request.url().startsWith("http://localhost:3200/");
+    if (!own || !["GET", "HEAD"].includes(request.method()) || request.postDataBuffer()?.length) {
+      outbound.push(request.method() + " " + request.url());
+    }
+  });
   const buffer = await png(page, 17, 11);
   await page.getByTestId("file-input").setInputFiles({ name: "scene.png", mimeType: "image/png", buffer });
   await expect(page.getByText("PNG · 17 × 11")).toBeVisible();
@@ -25,6 +29,8 @@ test("launches from the landing page and produces a valid resized JPG locally", 
   await expect(comparison).toHaveValue("51");
   await page.getByRole("button", { name: "Zoom in" }).click();
   await expect(page.getByText("125%", { exact: true })).toBeVisible();
+  await page.getByRole("group", { name: /Use the arrow keys to pan/ }).press("ArrowRight");
+  await expect(page.locator(".preview-layer").first()).toHaveCSS("transform", "matrix(1.25, 0, 0, 1.25, -16, 0)");
   const [file] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download scene.jpg" }).click()]);
   expect(file.suggestedFilename()).toBe("scene.jpg");
   expect(inspectBytes(await downloaded(file))).toEqual({ format: "image/jpeg", width: 34, height: 22 });
@@ -71,7 +77,7 @@ test("contains bad files, protects transparency, and retries with new settings",
   const [file] = await Promise.all([page.waitForEvent("download"), page.getByRole("button", { name: "Download alpha.png" }).click()]);
   const bytes = await downloaded(file);
   expect(inspectBytes(bytes)).toMatchObject({ width: 38, height: 26 });
-  expect(await alphaAt(page, bytes, 37, 25)).toBe(0);
+  expect((await readPixels(page, bytes, 37, 25, 1, 1))[3]).toBe(0);
   await page.getByRole("button", { name: "Clear completed" }).click();
   await expect(page.getByText("Your queue is empty.")).toBeVisible();
 });
