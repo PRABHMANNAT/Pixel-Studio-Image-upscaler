@@ -11,6 +11,11 @@ export function Preview({ entry }: { entry?: Entry }) {
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const drag = useRef<{ x: number; y: number } | null>(null);
   const zoomTo = (value: number) => { setZoom(value); if (value === 1) setPan({ x: 0, y: 0 }); };
+  function panTo(surface: HTMLElement, x: number, y: number) {
+    const maxX = surface.clientWidth * zoom / 2;
+    const maxY = surface.clientHeight * zoom / 2;
+    setPan({ x: Math.min(maxX, Math.max(-maxX, x)), y: Math.min(maxY, Math.max(-maxY, y)) });
+  }
   function begin(event: PointerEvent<HTMLDivElement>) {
     if (zoom === 1 || (event.target as HTMLElement).closest("input")) return;
     event.currentTarget.setPointerCapture(event.pointerId);
@@ -30,12 +35,20 @@ export function Preview({ entry }: { entry?: Entry }) {
       <strong>No image selected</strong><p>Import an image to preview it here.</p>
     </div> : <>
       <div className={"preview-surface" + (zoom > 1 ? " panning" : "")}
+        tabIndex={zoom > 1 ? 0 : undefined} role="group"
+        aria-label={zoom > 1 ? "Zoomed image. Use the arrow keys to pan." : "Image comparison"}
+        onKeyDown={event => {
+          if (zoom === 1 || event.target !== event.currentTarget) return;
+          const step = event.shiftKey ? 64 : 16;
+          const delta = { ArrowLeft: [step, 0], ArrowRight: [-step, 0], ArrowUp: [0, step], ArrowDown: [0, -step] }[event.key];
+          if (!delta) return;
+          event.preventDefault();
+          panTo(event.currentTarget, pan.x + delta[0], pan.y + delta[1]);
+        }}
         onPointerDown={begin}
         onPointerMove={event => {
           if (!drag.current) return;
-          const maxX = event.currentTarget.clientWidth * zoom / 2;
-          const maxY = event.currentTarget.clientHeight * zoom / 2;
-          setPan({ x: Math.min(maxX, Math.max(-maxX, event.clientX - drag.current.x)), y: Math.min(maxY, Math.max(-maxY, event.clientY - drag.current.y)) });
+          panTo(event.currentTarget, event.clientX - drag.current.x, event.clientY - drag.current.y);
         }}
         onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}>
         <div className="preview-layer" style={{ transform: "translate(" + pan.x + "px," + pan.y + "px) scale(" + zoom + ")" }}>
