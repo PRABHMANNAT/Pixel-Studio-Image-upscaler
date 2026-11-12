@@ -24,3 +24,10 @@ it("propagates write failure and enforces a bounded memory fallback", async () =
   await expect(writeArchive([{ path: "x.png", blob: new Blob(["x"]) }], () => { throw new Error("disk full"); })).rejects.toThrow("disk full");
   await expect(archiveBlob([{ path: "x.png", blob: { size: BLOB_ZIP_LIMIT + 1 } as Blob }])).rejects.toThrow(/too large/);
 });
+it("avoids file and directory collisions when multiple source trees are merged", async () => {
+  const archive = await archiveBlob([
+    { path: "Album.png", blob: new Blob(["top level"]) },
+    { path: "album.png/inside.png", blob: new Blob(["inside directory"]) },
+  ]);
+  expect(Object.keys(unzipSync(new Uint8Array(await archive.arrayBuffer())))).toEqual(["Album (2).png", "album.png/inside.png"]);
+});

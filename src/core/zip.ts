@@ -1,5 +1,5 @@
 import { Zip, ZipPassThrough } from "fflate";
-import { uniquePath } from "./paths";
+import { safePath, uniquePath } from "./paths";
 
 export type ArchiveFile = { path: string; blob: Blob };
 export const BLOB_ZIP_LIMIT = 96 * 1024 ** 2;
@@ -17,6 +17,12 @@ export async function writeArchive(files: ArchiveFile[], write: (chunk: Uint8Arr
     for (const chunk of emitted.splice(0)) await write(chunk);
   };
   const used = new Set<string>();
+  for (const file of files) {
+    const path = safePath(file.path);
+    for (let i = path.indexOf("/"); i >= 0; i = path.indexOf("/", i + 1)) {
+      used.add(path.slice(0, i).toLowerCase());
+    }
+  }
   try {
     for (const { path, blob } of files) {
       const entry = new ZipPassThrough(uniquePath(path, used));
