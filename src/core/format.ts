@@ -5,6 +5,34 @@ const tag = (data: Uint8Array, at: number, count = 4) => String.fromCharCode(...
 const PNG = [137, 80, 78, 71, 13, 10, 26, 10];
 const frameMarkers = new Set([0xc0, 0xc1, 0xc2, 0xc3, 0xc5, 0xc6, 0xc7, 0xc9, 0xca, 0xcb, 0xcd, 0xce, 0xcf]);
 
+function inspectAvif(data: Uint8Array, view: DataView, offset: number): Header {
+  const result: Header = { format: "image/avif" };
+  function scan(start: number, end: number, depth: number) {
+    for (let i = start; i < end;) {
+      if (i + 8 > end) throw new Error("The AVIF container is truncated.");
+      const rawSize = view.getUint32(i);
+      const type = tag(data, i + 4);
+      const head = rawSize === 1 ? 16 : 8;
+      if (i + head > end) throw new Error("The AVIF container is truncated.");
+      const length = rawSize === 1 ? Number(view.getBigUint64(i + 8)) : rawSize || end - i;
+      if (length < head || length > end - i) throw new Error("The AVIF container is truncated.");
+      const content = i + head;
+      if (type === "moov" && depth === 0) throw new Error("AVIF image sequences are unsupported. Export a still frame first.");
+      if (type === "ispe" && length >= head + 12) {
+        // Take the largest known extents, including grid or auxiliary image properties.
+        result.width = Math.max(result.width ?? 0, view.getUint32(content + 4));
+        result.height = Math.max(result.height ?? 0, view.getUint32(content + 8));
+      }
+      if (depth < 4 && (type === "meta" || type === "iprp" || type === "ipco")) {
+        scan(content + (type === "meta" ? 4 : 0), i + length, depth + 1);
+      }
+      i += length;
+    }
+  }
+  scan(offset, data.length, 0);
+  return result;
+}
+
 export function inspectBytes(data: Uint8Array): Header {
   const view = new DataView(data.buffer, data.byteOffset, data.byteLength);
   if (PNG.every((b, i) => data[i] === b)) {
@@ -57,7 +85,7 @@ export function inspectBytes(data: Uint8Array): Header {
     const brands = [tag(data, 8)];
     for (let i = 16; i + 4 <= end; i += 4) brands.push(tag(data, i));
     if (brands.includes("avis")) throw new Error("Animated AVIF is unsupported. Export a still frame first.");
-    if (brands.includes("avif")) return { format: "image/avif" };
+    if (brands.includes("avif")) return inspectAvif(data, view, end);
     throw new Error("HEIC/HEIF and other ISO image containers are unsupported.");
   }
   if (tag(data, 0, 3) === "GIF") throw new Error("GIF is unsupported. Export a still frame first.");

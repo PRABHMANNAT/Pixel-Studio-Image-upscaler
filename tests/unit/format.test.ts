@@ -22,3 +22,20 @@ it("refuses APNG, animated WebP, GIF and animated AVIF", () => {
 it("refuses HEIC instead of mislabeling it as AVIF", () => {
   expect(() => inspectBytes(Buffer.from("\0\0\0\x10ftypheic\0\0\0\0"))).toThrow(/HEIC/);
 });
+it("reads AVIF dimensions from item properties and refuses sequence boxes", () => {
+  function box(type: string, payload: Buffer) {
+    const header = Buffer.alloc(8);
+    header.writeUInt32BE(payload.length + 8);
+    header.write(type, 4, "ascii");
+    return Buffer.concat([header, payload]);
+  }
+  const ftyp = box("ftyp", Buffer.from("avif\0\0\0\0"));
+  const dimensions = Buffer.alloc(12);
+  dimensions.writeUInt32BE(1200, 4);
+  dimensions.writeUInt32BE(720, 8);
+  const properties = box("iprp", box("ipco", box("ispe", dimensions)));
+  const meta = box("meta", Buffer.concat([Buffer.alloc(4), properties]));
+  expect(inspectBytes(Buffer.concat([ftyp, meta]))).toEqual({ format: "image/avif", width: 1200, height: 720 });
+  expect(() => inspectBytes(Buffer.concat([ftyp, box("moov", Buffer.alloc(0))]))).toThrow(/sequences/);
+  expect(() => inspectBytes(Buffer.concat([ftyp, meta.subarray(0, -1)]))).toThrow(/truncated/);
+});
