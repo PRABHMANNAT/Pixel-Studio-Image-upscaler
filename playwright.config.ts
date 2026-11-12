@@ -14,7 +14,7 @@ export default defineConfig({
     trace: "retain-on-failure",
   },
   webServer: {
-    command: "npm run dev -- --port 3200",
+    command: process.env.PIXELFORGE_TEST_STATIC === "1" ? "npm run preview -- 3200" : "npm run dev -- --port 3200",
     url: "http://localhost:3200/studio/",
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

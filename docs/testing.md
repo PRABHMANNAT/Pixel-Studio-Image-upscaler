@@ -2,6 +2,8 @@
 
 `npm test` runs unit tests for resize calculations, alpha handling, image signatures, queue transitions, overlapping tiles, filename safety, and ZIP contents. `npm run test:e2e` starts Next.js on port 3200 and uses Chromium to exercise the UI, worker, encoders, and downloads together.
 
+To test the production export, run `npm run build` and then set `PIXELFORGE_TEST_STATIC=1` when running Playwright. It serves `out/` with the same response headers declared in `vercel.json`. To inspect the build manually, run `npm run preview`.
+
 Run the inference test on a connection that can reach Hugging Face:
 
 ```sh
