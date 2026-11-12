@@ -8,7 +8,6 @@ const reserved = /^(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i;
 export function safePath(path: string): string {
   return path.normalize("NFC").replaceAll("\\", "/").split("/")
     .filter(part => part && part !== "." && part !== "..")
-    // eslint-disable-next-line no-control-regex
     .map(part => part.replace(/[<>:"|?*\u0000-\u001f\u007f]/g, "_").replace(/[. ]+$/g, ""))
     .filter(Boolean)
     .map(part => {
