@@ -1,7 +1,6 @@
 import { cva, type VariantProps } from "class-variance-authority";
-import { clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
 import type { ComponentProps } from "react";
+import { cn } from "@/lib/utils";
 
 const variants = cva("button inline-flex items-center justify-center gap-2 whitespace-nowrap font-semibold", {
   variants: {
@@ -12,5 +11,5 @@ const variants = cva("button inline-flex items-center justify-center gap-2 white
 });
 
 export function Button({ variant, size, className, type = "button", ...props }: ComponentProps<"button"> & VariantProps<typeof variants>) {
-  return <button type={type} className={twMerge(clsx(variants({ variant, size }), className))} {...props} />;
+  return <button data-slot="button" type={type} className={cn(variants({ variant, size }), className)} {...props} />;
 }
