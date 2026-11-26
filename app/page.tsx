@@ -1,34 +1,35 @@
 import Link from "next/link";
-import { ArrowRight, Cpu, FolderTree, ImageIcon, ShieldCheck } from "lucide-react";
+import { Aperture, Focus, Images, ScanLine } from "lucide-react";
 import { BrandBar } from "../src/ui/brand";
+import { ProofPlate } from "../src/ui/proof-plate";
+import "./darkroom.css";
 
 export default function Home() {
-  return <>
-    <BrandBar><Link className="header-link" href="/studio/">Open studio <ArrowRight size={15} /></Link></BrandBar>
-    <main className="landing" id="main">
-      <section className="hero">
-        <div className="hero-copy">
-          <p className="eyebrow"><span /> PRIVATE BY DESIGN</p>
-          <h1>Better images.<br /><em>Still yours.</em></h1>
-          <p>Resize, convert, and upscale entire folders of images. Everything runs in your browser, and your files stay on your device.</p>
-          <Link className="button button-primary button-default hero-action" href="/studio/">Open image studio <ArrowRight size={18} /></Link>
-          <small>Free to use · No account required</small>
-        </div>
-        <div className="hero-art" aria-hidden="true">
-          <div className="hero-art-top"><span><i /><i /><i /></span><span>PIXELFORGE / LOCAL</span></div>
-          <div className="hero-grid">
-            <div className="art-tile art-back" /><div className="art-tile art-front"><ImageIcon size={56} strokeWidth={1} /></div>
-            <span className="art-label art-label-top">SOURCE / 01</span><span className="art-label art-label-bottom">OUTPUT / 02</span>
+  return <div className="darkroom-home">
+    <BrandBar><a className="header-link" href="#instruments">Tools</a><Link className="nav-launch" href="/studio/">Open studio</Link></BrandBar>
+    <main id="main">
+      <section className="frontispiece">
+        <div className="front-inner">
+          <div className="front-copy">
+            <div className="lab-kicker"><span aria-hidden="true" /> Browser-based image lab</div>
+            <h1>Digital<br /><em>darkroom.</em></h1>
+            <p>Enlarge, grade, and proof your images. A private workbench for a single frame or an entire folder.</p>
+            <div className="launch-actions"><Link className="launch-main" href="/studio/"><Aperture size={20} /> Open image studio</Link>
+              <Link className="launch-sample" href="/studio/?sample=nebula">Try the sample</Link></div>
+            <div className="format-strip" aria-label="Supported formats"><span>Accepts</span> JPG <i /> PNG <i /> WEBP <i /> AVIF</div>
           </div>
-          <div className="hero-art-bottom"><span>IMAGE PROCESSOR</span><span><i /> READY</span></div>
+          <ProofPlate />
         </div>
       </section>
-      <section className="features" aria-label="Studio features">
-        <article><FolderTree size={22} /><h2>Whole folders, intact</h2><p>Keep nested folders organized when you download the batch as a ZIP.</p></article>
-        <article><Cpu size={22} /><h2>Two ways to upscale</h2><p>Use Lanczos for fast resizing, or try Real-ESRGAN for AI enhancement.</p></article>
-        <article><ShieldCheck size={22} /><h2>No image uploads</h2><p>Your files are processed on your device and originals stay untouched.</p></article>
+      <section className="instruments" id="instruments" aria-labelledby="instrument-title">
+        <div className="instrument-intro"><p className="micro">Inside the studio</p><h2 id="instrument-title">Tools of the trade.</h2></div>
+        <div className="instrument-list">
+          <article><Focus /><div><h3>Frame &amp; enlarge</h3><p>Crop a series to one ratio, preserve pixel-art edges, or enlarge photographs with Real-ESRGAN.</p></div></article>
+          <article><ScanLine /><div><h3>Grade &amp; proof</h3><p>Balance exposure and color, inspect the histogram, and compare the encoded image against its source.</p></div></article>
+          <article><Images /><div><h3>Batch &amp; deliver</h3><p>Save a recipe, keep your folder structure, and download your exports with a file-by-file report.</p></div></article>
+        </div>
       </section>
     </main>
-    <footer className="landing-foot">PixelForge Studio <span>Image processing on your device</span></footer>
-  </>;
+    <footer className="lab-footer"><strong>PixelForge Studio</strong><span>Local image processing</span><a href="https://github.com/PRABHMANNAT/Pixel-Studio-Image-upscaler">GitHub</a></footer>
+  </div>;
 }
