@@ -5,6 +5,7 @@ import { useEffect, useState, useSyncExternalStore } from "react";
 import { batchReport } from "../core/report";
 import { download, saveZip } from "../client/download";
 import { readSettings, readTheme, saveSettings, setTheme, type Theme } from "../client/preferences";
+import { sampleFile } from "../client/sample";
 import { Studio } from "../client/studio";
 import { duration } from "../core/display";
 import { defaults, type Settings } from "../core/settings";
@@ -36,6 +37,23 @@ export function StudioApp() {
     return () => clearTimeout(timer);
   }, [state.notice, studio]);
 
+  useEffect(() => {
+    const url = new URL(window.location.href);
+    if (url.searchParams.get("sample") !== "nebula") return;
+    let cancelled = false;
+    sampleFile().then(file => {
+      if (cancelled) return;
+      studio.add([file]);
+      url.searchParams.delete("sample");
+      history.replaceState(history.state, "", url);
+    }).catch(() => { if (!cancelled) studio.notify("The sample could not be loaded. Try adding it again."); });
+    return () => { cancelled = true; };
+  }, [studio]);
+
+  async function addSample() {
+    try { studio.add([await sampleFile()]); }
+    catch { studio.notify("The sample could not be loaded. Try again or add your own image."); }
+  }
   function preferences(value: Settings) {
     changeSettings(value);
     saveSettings(value);
@@ -69,7 +87,7 @@ export function StudioApp() {
       <div className="workspace">
         <div className="workspace-main">
           <IntakePanel add={files => studio.add(files)} notify={message => studio.notify(message)} />
-          <Preview key={selected?.id} entry={selected} />
+          <Preview key={selected?.id} entry={selected} addSample={addSample} />
           <QueuePanel newVersion={id => studio.newVersion(id)} locked={active} entries={state.entries} selected={state.selected} select={id => studio.select(id)} remove={id => studio.remove(id)} />
         </div>
         <div className="workspace-side">

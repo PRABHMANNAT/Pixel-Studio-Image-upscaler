@@ -1,11 +1,13 @@
 /* eslint-disable @next/next/no-img-element -- Local object URLs are never sent to an image optimization server. */
-import { ImageIcon, ScanLine, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { sample } from "../client/sample";
+import { ScanLine, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { useRef, useState, type PointerEvent } from "react";
 import { bytes } from "../core/display";
 import type { Entry } from "../core/queue";
 import { Button } from "./button";
 
-export function Preview({ entry }: { entry?: Entry }) {
+export function Preview({ entry, addSample }: { entry?: Entry; addSample: () => Promise<void> }) {
+  const [loadingSample, setLoadingSample] = useState(false);
   const [split, setSplit] = useState(50);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -31,8 +33,12 @@ export function Preview({ entry }: { entry?: Entry }) {
       </div>}
     </div>
     {!entry?.input ? <div className="preview-empty">
-      <div className="preview-mark"><ImageIcon size={29} strokeWidth={1.4} /></div>
-      <strong>No image selected</strong><p>Import an image to preview it here.</p>
+      <img className="sample-frame" src={sample.url} alt="The orange wings and blue core of the Butterfly Nebula" />
+      <div className="sample-caption"><span className="micro">Sample negative · {sample.catalog}</span>
+        <strong>{sample.title}</strong>
+        <Button disabled={loadingSample} onClick={async () => { setLoadingSample(true); try { await addSample(); } finally { setLoadingSample(false); } }}>{loadingSample ? "Loading sample…" : "Use sample image"}</Button>
+        <a href={sample.source}>{sample.credit}</a>
+      </div>
     </div> : <>
       <div className={"preview-surface" + (zoom > 1 ? " panning" : "")}
         tabIndex={zoom > 1 ? 0 : undefined} role="group"
