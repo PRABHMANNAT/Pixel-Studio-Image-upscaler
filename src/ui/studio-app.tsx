@@ -2,7 +2,8 @@
 
 import { Archive, CircleAlert, CircleHelp, Moon, Pause, Play, RotateCcw, Square, Sun, Trash2, X } from "lucide-react";
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { saveZip } from "../client/download";
+import { batchReport } from "../core/report";
+import { download, saveZip } from "../client/download";
 import { readSettings, readTheme, saveSettings, setTheme, type Theme } from "../client/preferences";
 import { Studio } from "../client/studio";
 import { duration } from "../core/display";
@@ -85,6 +86,7 @@ export function StudioApp() {
               {state.run === "paused" && <Button variant="primary" onClick={() => studio.resume()}><Play size={16} /> Resume</Button>}
               {active && <Button onClick={() => studio.cancel()}><Square size={15} /> Cancel batch</Button>}
               <Button disabled={!completed.length || exporting} onClick={zip}><Archive size={16} /> {exporting ? "Preparing ZIP…" : "Download all as ZIP"}</Button>
+              <Button disabled={!state.entries.length} onClick={() => download(new Blob([batchReport(state.entries)], { type: "text/csv;charset=utf-8" }), "pixelforge-report.csv")}>Download batch report</Button>
               <div className="batch-secondary">
                 <Button size="small" variant="ghost" disabled={!errors || active} onClick={() => studio.retry()}><RotateCcw size={14} /> Retry failed</Button>
                 <Button size="small" variant="ghost" disabled={!completed.length || exporting} onClick={() => studio.clearCompleted()}><Trash2 size={14} /> Clear completed</Button>
