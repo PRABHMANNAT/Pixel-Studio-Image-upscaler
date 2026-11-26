@@ -1,3 +1,4 @@
+import { RecipeControls } from "./recipe-controls";
 import { ToneControls } from "./tone-controls";
 import { FramingControls } from "./framing-controls";
 import { Cpu, SlidersHorizontal, Sparkles, Zap } from "lucide-react";
@@ -18,6 +19,7 @@ export function SettingsPanel({ settings, change, capabilities, locked }: {
     <div className="panel-heading"><SlidersHorizontal size={17} /><h2>Processing settings</h2></div>
     <fieldset disabled={locked}>
       <legend className="sr-only">Processing settings</legend>
+      <RecipeControls settings={settings} change={change} />
       <span className="field-label" id="engine-label">Processing mode</span>
       <div className="modes" role="radiogroup" aria-labelledby="engine-label">
         <label className="mode"><input type="radio" name="mode" value="resize" checked={settings.mode === "resize"} onChange={() => patch({ mode: "resize" })} /><Zap size={16} /> Fast Resize</label>
