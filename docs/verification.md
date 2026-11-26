@@ -1,9 +1,15 @@
-# Delivery verification
+# Darkroom verification
 
-The application was verified on Windows with Node.js 24 and Playwright Chromium. `npm install`, lint, type checking, and the production build completed. Vitest passed 22 tests. Chromium passed 11 tests against the production static export with the response headers declared in `vercel.json`.
+Verified on Windows with Node.js 24 and Playwright driving Chromium against the static production export. The test server sent the response headers from `vercel.json`.
 
-Browser checks covered JPG, PNG, WebP, and AVIF outputs; alpha preservation; EXIF orientation; nested folder intake; readable ZIP contents and the writable-file interface; pause, cancel, and retry; and basic mobile layout and preference persistence. The normal conversion test observed no external requests or HTTP requests with file data during processing.
+| Check | Result |
+| --- | --- |
+| Installation and build | npm installation, ESLint, TypeScript, and the Next.js static export completed. |
+| Unit suite | 34 cases passed, including crop coordinates, quarter turns, exact nearest-neighbor pixels, tone math, alpha-weighted histogram bins, settings migration, safe filenames, and CSV quoting. |
+| Browser suite | All 18 cases passed with the real-model test enabled. Scenarios exercised browser inputs, worker processing, file downloads, and decoded output pixels. All seven darkroom feature scenarios also passed in Microsoft Edge on Windows. |
+| AI providers | The end-to-end test ran the checksum-verified x2plus model through WebGPU and checked the result against Lanczos. A separate Chromium run with GPU support disabled fetched the model from Hugging Face and completed an export through WebAssembly. |
+| Accessibility and layout | Automated axe checks reported zero WCAG 2/2.1 A/AA violations on the landing page and the empty light and dark workspaces in Chromium. Keyboard zoom, pan, split comparison, loupe movement, reduced motion, WebGL fallback, and a 320 px viewport were exercised. |
 
-The AI test downloaded the pinned weights, ran Real-ESRGAN using WASM, compared its decoded pixels with a Lanczos result, and confirmed inference from the local cache while the model request was blocked. The suite also verified recovery after a corrupt model download. WebGPU is implemented as an optional provider; hardware acceleration was not verified in this run.
+The production tests assert transformed pixel positions, opacity and matte colors, real AVIF round trips, downloaded ZIP entries, CSV contents, export naming, and persistence of recipes. They cover malformed files, corrupted weights, cancellation, retry, and inference from cached weights when the model request is blocked.
 
-Vercel compatibility was checked by building and serving `out/` locally. A live Vercel deployment was outside this delivery. The native save picker itself was not automated; the browser suite exercised the writer it returns and inspected the resulting ZIP bytes.
+The native save dialog is controlled by the operating system. Its browser test exercises the returned writable stream and reads the resulting archive. Cross-browser testing on physical Safari and Firefox devices remains outside this verification. [How to repeat the checks](testing.md)

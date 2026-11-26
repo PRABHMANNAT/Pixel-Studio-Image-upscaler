@@ -1,27 +1,14 @@
 # PixelForge Studio
 
-**Batch resize, convert, and AI-upscale images in your browser. Your photos stay on your device.**
-
-Turn a folder of product photos into WebP, enlarge small assets with Real-ESRGAN, or fit a whole batch within the same size limits. Compare the results side by side, then download individual files or a ZIP that keeps your folder structure.
+A browser-based darkroom for resizing, grading, upscaling, and proofing batches of images. Drop a folder, choose a recipe, and compare the encoded output with its original before downloading. Images stay on your device.
 
 [![Verify PixelForge](https://github.com/PRABHMANNAT/Pixel-Studio-Image-upscaler/actions/workflows/verify.yml/badge.svg?branch=main)](https://github.com/PRABHMANNAT/Pixel-Studio-Image-upscaler/actions/workflows/verify.yml)
 
-[Run locally](#run-locally) · [Choose a mode](#choose-a-mode) · [Deploy](#deploy) · [Report a bug](https://github.com/PRABHMANNAT/Pixel-Studio-Image-upscaler/issues)
+![PixelForge's photographic landing page featuring Hubble's Butterfly Nebula and an interactive inspection loupe](docs/darkroom-home.jpg)
 
-![PixelForge Studio showing an original and a 2× WebP output of an alpine lake, three completed images, and the ZIP export controls](docs/studio-preview.jpg)
+## Make your first proof
 
-*The studio after converting a three-image batch to WebP.*
-
-## What you can do
-
-- **Resize entire folders.** Drop images or select a folder, then use a 2×, 4×, 2K, 4K, or custom size preset. The aspect ratio is preserved by default.
-- **Convert between JPG, PNG, WebP, and AVIF.** Choose original size for conversion only. AVIF output uses the browser's encoder when available and falls back to libavif in WebAssembly.
-- **Check the result before exporting.** Drag the before/after divider, zoom in for details, and compare dimensions and file sizes.
-- **Manage longer batches.** See progress for each image, pause between files, cancel, or retry failures. Download one image or export the batch as a ZIP with nested paths preserved.
-
-## Run locally
-
-You'll need Node.js 22 or newer.
+Use Node.js 22 or later and npm.
 
 ```sh
 git clone https://github.com/PRABHMANNAT/Pixel-Studio-Image-upscaler.git
@@ -30,51 +17,65 @@ npm ci
 npm run dev
 ```
 
-Open [the studio on localhost](http://localhost:3000/studio/), add files, choose a size and output format, and click **Start batch**.
+1. Open the [local studio](http://localhost:3000/studio/). Paste an image, drop a folder, or choose **Use sample image** to work with the bundled Hubble photograph.
+2. In **Inspector**, choose **Monochrome print**. It keeps the source dimensions and produces a grayscale PNG. **Planned output** shows the dimensions for the selected file.
+3. Choose **Start batch**. Drag the light-table divider or focus it and use the arrow keys. Open **Luminance histogram** to inspect the original or output.
+4. Download the file from its queue row. **Download all as ZIP** keeps nested folders, and **Download batch report** saves a CSV of filenames, dimensions, sizes, and statuses.
 
-## Choose a mode
+![The light table comparing the Butterfly Nebula with its exported monochrome PNG, alongside the inspector and luminance histogram](docs/studio-preview.jpg)
 
-| Mode | Best for | How it works |
+## Choose the right processing method
+
+| Method | Good fit | Behavior |
 | --- | --- | --- |
-| **Fast Resize** | Bulk resizing and format conversion | Lanczos resampling preserves transparent edges. Optional sharpening adds definition to opaque details. |
-| **AI Upscale** | Enlarging smaller images | Real-ESRGAN x2plus runs a native 2× pass. Other output sizes resample that result. The app tries WebGPU and falls back to WebAssembly. |
+| Fast Resize · Lanczos | Photographs, thumbnails, format conversion | Filters edges with premultiplied alpha. Choose **Original size** for conversion alone. |
+| Fast Resize · Nearest neighbor | Sprites, pixel art, interface assets | Copies the nearest pixel. The **Pixel art 4×** recipe scales each pixel into a four-by-four block. |
+| AI Upscale · Real-ESRGAN x2plus | Enhancing a small photograph | Runs a native 2× model pass, then resamples to the requested dimensions. Tries WebGPU and can fall back to WebAssembly. |
 
-AI Upscale downloads and verifies a roughly 64 MiB model on first use. The browser can cache it for later runs. A Web Worker handles image decoding and model inference, and your browser creates the exports. No account or API key is required.
+The first AI run downloads approximately 64 MiB of model weights from Hugging Face. The worker verifies their SHA-256 checksum and can reuse the browser cache. Fast Resize and all image controls run locally with the application assets. [Model provenance](docs/model.md)
 
-<details>
-<summary>Supported files and batch limits</summary>
+## Workbench controls
 
-- **Inputs:** Static JPG, PNG, WebP, and AVIF, subject to browser decoding support. Animated images, GIF, SVG, HEIC, and HEIF are unsupported.
-- **Transparency:** PNG, WebP, and AVIF can keep alpha. JPG requires your permission to flatten transparent areas onto a white background.
-- **Per image:** Up to 48 MiB, 24 megapixels, and 8,192 pixels on either edge. AI inputs are capped at 3 megapixels, and the WASM AVIF encoder is capped at 6 megapixels.
-- **Per batch:** Up to 80 queued images and 256 MiB of completed exports. Supported browsers can stream ZIPs to disk. The in-memory ZIP fallback is capped at 96 MiB.
-- **On reload:** Settings and cached model weights can persist. The queue, source images, and processed files clear.
+| Task | Available controls |
+| --- | --- |
+| Bring images in | File or folder picker, nested folder drop, clipboard paste, and a built-in photographic sample |
+| Compose | Center crop to 1:1, 4:5, 3:2, or 16:9. Rotate in quarter turns, mirror horizontally, and check the planned output dimensions. |
+| Develop | Adjust exposure in EV, contrast, and saturation. Sharpen opaque details or select a matte color for transparent JPEG exports. |
+| Repeat a look | Start with **Web delivery**, **Monochrome print**, or **Pixel art 4×**. Save one personal recipe on the device and recall it after a reload. |
+| Inspect | Split, original-only, and output-only views. Zoom and pan, switch between checkerboard, black, and white, and inspect a sampled luminance histogram. The gallery sample also has a keyboard-operable 2× loupe. |
+| Organize | Search filenames, filter by status, and sort by name or size. The batch processes in import order even when the displayed list is filtered. |
+| Deliver | Append a filename suffix, download a result or a ZIP, and export a CSV report. **Make new version** queues the original again and retains the first export. |
 
-</details>
+Processing applies the centered crop first, followed by rotation and mirroring, optional AI enhancement, resizing, tone adjustments, sharpening, and encoding. The light table shows the completed export. For another treatment, make a new version and start a new batch.
 
-## Deploy
+## Files, privacy, and limits
 
-Import this repository into Vercel and deploy `main` with Node.js 22 or later. The included configuration builds and serves the static `out/` directory without environment variables. To preview the production build locally:
+| Item | Behavior |
+| --- | --- |
+| Formats | Still JPG, PNG, WebP, and AVIF, subject to browser decoding support. AVIF export can use the bundled libavif WebAssembly encoder. |
+| Transparency | PNG, WebP, and AVIF support alpha. Enable **Allow background for JPG** and choose the matte when flattening transparent input. |
+| One image | Up to 48 MiB, 24 megapixels, and 8,192 pixels per edge. The AI input limit is 3 megapixels after framing. The WASM AVIF encoder supports outputs up to 6 megapixels. |
+| One batch | Up to 80 queued files and 256 MiB of completed outputs. The in-memory ZIP fallback supports 96 MiB. Compatible browsers can stream ZIPs to disk. |
+| Reloading | Files and exports live in the tab. Preferences, the personal recipe, and cached model weights can persist on the device. |
+| Browser | Use a modern browser with Web Workers, OffscreenCanvas, and image decoding support. AI requires HTTPS or localhost. Animated images, HEIC/HEIF, and metadata preservation are outside the supported workflow. |
 
-```sh
-npm run build
-npm run preview
-```
+The gallery loads Three.js on demand when the loupe opens. A CSS magnifier supplies the same interaction when WebGL is unavailable. The loupe respects reduced-motion preferences. [Architecture and privacy](docs/architecture.md)
 
-You can also serve `out/` from another HTTPS static host that sends the correct content types for `.mjs` and `.wasm`.
-
-## Development
-
-PixelForge uses Next.js, TypeScript, Web Workers, ONNX Runtime Web, and fflate. Run the local checks with:
+## Verify and deploy
 
 ```sh
 npm run lint
 npm run typecheck
 npm test
+npm run build
 npx playwright install chromium
 npm run test:e2e
 ```
 
-[Architecture and privacy](docs/architecture.md) · [Model provenance](docs/model.md) · [Testing and AI smoke test](docs/testing.md) · [Delivery verification](docs/verification.md) · [Commit ledger](docs/commit-ledger.md)
+The production build writes a static site to `out/`. Run `npm run preview` to inspect that build locally, or import the repository into Vercel using the included configuration. Other HTTPS static hosts should serve the exported files with their correct MIME types, including the worker, WebAssembly, and font assets. [Production and real-model test instructions](docs/testing.md) · [Verification results](docs/verification.md)
 
-If PixelForge helps with your image workflow, [give it a star](https://github.com/PRABHMANNAT/Pixel-Studio-Image-upscaler) so you can find it again.
+## Credits
+
+The sample is Hubble’s observation of NGC 6302, credited to **NASA, ESA and the Hubble SM4 ERO Team**. The bundled JPEG is resized from the original. The workspace screenshot includes a monochrome rendition. [Original photograph](https://esahubble.org/images/heic0910h/) · [ESA/Hubble usage terms](https://esahubble.org/copyright/) · [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
+
+The interface uses Barlow Condensed and DM Sans. Licenses for the fonts, Three.js, Motion, and bundled image runtimes are included in the repository. [Third-party notices](public/notices/)

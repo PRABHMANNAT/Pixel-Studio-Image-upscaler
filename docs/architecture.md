@@ -4,9 +4,11 @@ PixelForge is a static Next.js App Router export. The browser sends selected `Fi
 
 The queue runs one worker operation at a time. It takes a copy of the settings at the start of each batch. Pausing lets the current operation finish. Cancelling terminates the worker, including any active inference or fetch, while keeping completed results. Worker failures are attached to the affected file so the batch can continue. Idle workers are terminated to release their image and inference memory.
 
-Fast Resize filters in two separable Lanczos passes, with premultiplied alpha. AI tiles include context beyond the area copied into the output, then crop the overlapped border to reduce seams. The native model enhances RGB; alpha is resampled separately. These choices avoid silently dropping alpha, but AI can still produce artifacts on fine textures or transparent edges.
+The worker draws the center crop, applies clockwise rotation, and mirrors the resulting frame when selected. Fast Resize supports separable Lanczos filtering with premultiplied alpha and nearest-neighbor sampling for pixel art. AI tiles include context beyond the area copied into the output, then crop the overlapped border to reduce seams. The native model enhances RGB; alpha is resampled separately. These choices avoid silently dropping alpha, but AI can still produce artifacts on fine textures or transparent edges.
 
-The first AI run requests a pinned public model from Hugging Face. The request uses no credentials or referrer and carries no image data. The runtime loads from this site. Model weights are checksum-verified on each read from Cache Storage; settings and theme use local storage. Hosting providers still see ordinary requests for the page and its assets.
+The first AI run requests a pinned public model from Hugging Face. The request uses no credentials or referrer and carries no image data. The runtime loads from this site. Model weights are checksum-verified on each read from Cache Storage; settings, the personal recipe, and the theme use local storage. Hosting providers still see ordinary requests for the page and its assets.
+
+Tone adjustments, optional sharpening, and the selected JPEG matte are applied before encoding. The worker decodes the export to create its proof. The histogram samples a preview at up to 256 pixels on the long edge and weights samples by alpha.
 
 ZIP output uses stored entries because the image files are already encoded. Each blob is read as a stream, and the next chunk is consumed only after the destination accepts the previous one. The directory layout is preserved after removing traversal components and replacing invalid filename characters. Originals are never edited in place.
 
