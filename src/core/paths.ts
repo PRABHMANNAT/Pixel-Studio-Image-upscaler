@@ -16,9 +16,14 @@ export function safePath(path: string): string {
     }).join("/") || "image";
 }
 
-export function outputPath(path: string, format: Format) {
+export function outputPath(path: string, format: Format, suffix = "") {
   const safe = safePath(path);
-  return safe.replace(/(?<=[^/])\.[^./]+$/, "") + "." + extensions[format];
+  const parts = safe.split("/");
+  const stem = parts.pop()!.replace(/(?<=.)\.[^.]+$/, "");
+  const tag = suffix.trim().replace(/[^\p{L}\p{N}_-]+/gu, "-").slice(0, 32);
+  const extension = "." + extensions[format];
+  const base = [...stem].slice(0, 150 - tag.length - extension.length).join("");
+  return [...parts, base + tag + extension].join("/");
 }
 
 export function uniquePath(path: string, used: Set<string>): string {

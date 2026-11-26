@@ -1,6 +1,6 @@
 import type { Format, Settings } from "../core/settings";
 import { estimatedSeconds, transition, type Entry } from "../core/queue";
-import { outputPath, safePath } from "../core/paths";
+import { outputPath, safePath, uniquePath } from "../core/paths";
 import { QUEUE_LIMIT, type IntakeFile } from "./intake";
 import { Processor } from "./worker";
 
@@ -148,9 +148,11 @@ export class Studio {
             const retained = this.#state.entries.reduce((sum, item) => sum + (item.output?.blob.size ?? 0), 0);
             if (retained + data.blob.size > OUTPUT_LIMIT) throw new Error("The results limit is full. Download and clear completed files, then retry.");
             const { preview, ...output } = data;
+            const used = new Set(this.#state.entries.flatMap(entry => entry.output ? [entry.output.path.toLowerCase()] : []));
+            const path = uniquePath(outputPath(work.path, output.format, settings.suffix), used);
             this.#durations.push((performance.now() - started) / 1000);
             this.#update(work.id, item => transition(item, "done", {
-              output: { ...output, preview: URL.createObjectURL(preview), path: outputPath(item.path, output.format) },
+              output: { ...output, preview: URL.createObjectURL(preview), path },
             }));
           } catch (error) {
             if (this.#active === work.id && !this.#stopped) this.#update(work.id, item => transition(item, "failed", { error: String(error instanceof Error ? error.message : error) }));

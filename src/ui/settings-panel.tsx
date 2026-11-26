@@ -51,6 +51,7 @@ export function SettingsPanel({ settings, change, capabilities, locked, input }:
         <input type="range" min="0.1" max="1" step="0.01" value={settings.quality} disabled={settings.format === "image/png"} onChange={e => patch({ quality: Number(e.target.value) })} />
       </label>
       <p className="field-note">Quality applies to lossy formats. PNG stays lossless.</p>
+      <label className="field">Filename suffix<input type="text" placeholder="e.g. -web" maxLength={32} value={settings.suffix} onChange={e => patch({ suffix: e.target.value })} /></label>
       <FramingControls settings={settings} patch={patch} />
       <ToneControls settings={settings} patch={patch} />
       <label className="check"><input type="checkbox" checked={settings.sharpen} onChange={e => patch({ sharpen: e.target.checked })} /> Sharpen opaque details</label>
