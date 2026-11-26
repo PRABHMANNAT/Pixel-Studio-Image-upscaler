@@ -18,6 +18,11 @@ export function FramingControls({ settings, patch }: ControlProps) {
         </select>
       </label>
       <label className="check"><input type="checkbox" checked={settings.mirror} onChange={e => patch({ mirror: e.target.checked })} /> Mirror horizontally</label>
+      <label className="field">Resampling
+        <select value={settings.sampler} onChange={e => patch({ sampler: e.target.value as "lanczos" | "nearest" })}>
+          <option value="lanczos">Lanczos · photographs</option><option value="nearest">Nearest neighbor · pixel art</option>
+        </select>
+      </label>
     </div>
   </details>;
 }

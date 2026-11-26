@@ -84,3 +84,17 @@ export function sharpenPixels(data: Uint8ClampedArray, { width, height }: Dimens
   }
   return result;
 }
+
+export function nearest(data: Uint8ClampedArray, source: Dimensions, target: Dimensions) {
+  if (source.width === target.width && source.height === target.height) return data;
+  const result = new Uint8ClampedArray(target.width * target.height * 4);
+  const src = new Uint32Array(data.buffer, data.byteOffset, data.length / 4);
+  const dst = new Uint32Array(result.buffer);
+  for (let y = 0; y < target.height; y++) {
+    const row = Math.floor((y + 0.5) * source.height / target.height) * source.width;
+    for (let x = 0; x < target.width; x++) {
+      dst[y * target.width + x] = src[row + Math.floor((x + 0.5) * source.width / target.width)];
+    }
+  }
+  return result;
+}

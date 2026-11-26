@@ -4,6 +4,7 @@ export type Dimensions = { width: number; height: number };
 export const presets = ["original", "2x", "4x", "2k", "4k", "4096", "custom"] as const;
 export type Preset = (typeof presets)[number];
 export type Settings = {
+  sampler: "lanczos" | "nearest";
   matteColor: string;
   saturation: number;
   contrast: number;
@@ -23,6 +24,7 @@ export type Settings = {
   jpegMatte: boolean;
 };
 export const defaults: Settings = {
+  sampler: "lanczos",
   matteColor: "#ffffff",
   saturation: 0,
   contrast: 0,
@@ -89,6 +91,7 @@ export function restoreSettings(raw: string | null): Settings {
       contrast: typeof s.contrast === "number" && s.contrast >= -100 && s.contrast <= 100 ? s.contrast : 0,
       saturation: typeof s.saturation === "number" && s.saturation >= -100 && s.saturation <= 100 ? s.saturation : 0,
       matteColor: typeof s.matteColor === "string" && /^#[0-9a-f]{6}$/i.test(s.matteColor) ? s.matteColor : "#ffffff",
+      sampler: s.sampler === "nearest" ? "nearest" : "lanczos",
       mode: s.mode === "ai" ? "ai" : "resize",
       preset: presets.includes(s.preset as Preset) ? s.preset! : defaults.preset,
       format: s.format && formats.includes(s.format as Format) ? s.format : defaults.format,
