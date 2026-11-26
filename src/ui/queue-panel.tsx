@@ -1,6 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- Thumbnails use browser-local object URLs. */
 import { useState } from "react";
-import { Download, Images, List, X } from "lucide-react";
+import { CopyPlus, Download, Images, List, X } from "lucide-react";
 import { bytes, formatName } from "../core/display";
 import { leaf } from "../core/paths";
 import type { Entry, Status } from "../core/queue";
@@ -11,8 +11,8 @@ const statusNames: Record<Status, string> = {
   inspecting: "Reading", ready: "Ready", working: "Processing", done: "Completed", failed: "Failed", cancelled: "Cancelled",
 };
 
-export function QueuePanel({ entries, selected, select, remove }: {
-  entries: Entry[]; selected?: string; select: (id: string) => void; remove: (id: string) => void;
+export function QueuePanel({ entries, selected, select, remove, newVersion, locked }: {
+  newVersion: (id: string) => void; locked: boolean; entries: Entry[]; selected?: string; select: (id: string) => void; remove: (id: string) => void;
 }) {
   const [query, setQuery] = useState("");
   const [filter, setFilter] = useState("all");
@@ -44,6 +44,7 @@ export function QueuePanel({ entries, selected, select, remove }: {
         </button>
         <span className={"status status-" + entry.status}>{statusNames[entry.status]}{entry.status === "working" ? " " + Math.round(entry.progress * 100) + "%" : ""}</span>
         <span className="row-actions">
+          {entry.output && <Button size="icon" variant="ghost" disabled={locked} aria-label={"Make new version of " + leaf(entry.path)} onClick={() => newVersion(entry.id)}><CopyPlus size={15} /></Button>}
           {entry.output && <Button variant="ghost" size="icon" aria-label={"Download " + leaf(entry.output.path)} onClick={() => download(entry.output!.blob, leaf(entry.output!.path))}><Download size={16} /></Button>}
           <Button variant="ghost" size="icon" aria-label={"Remove " + leaf(entry.path)} disabled={entry.status === "working"} onClick={() => remove(entry.id)}><X size={16} /></Button>
         </span>

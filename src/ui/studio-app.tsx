@@ -69,7 +69,7 @@ export function StudioApp() {
         <div className="workspace-main">
           <IntakePanel add={files => studio.add(files)} notify={message => studio.notify(message)} />
           <Preview key={selected?.id} entry={selected} />
-          <QueuePanel entries={state.entries} selected={state.selected} select={id => studio.select(id)} remove={id => studio.remove(id)} />
+          <QueuePanel newVersion={id => studio.newVersion(id)} locked={active} entries={state.entries} selected={state.selected} select={id => studio.select(id)} remove={id => studio.remove(id)} />
         </div>
         <div className="workspace-side">
           <SettingsPanel input={selected?.input} settings={settings} change={preferences} capabilities={state.capabilities} locked={active} />

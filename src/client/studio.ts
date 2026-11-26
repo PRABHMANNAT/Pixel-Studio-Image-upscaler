@@ -71,6 +71,16 @@ export class Studio {
     void this.#pump();
   }
 
+  newVersion(id: string) {
+    const entry = this.#state.entries.find(item => item.id === id && item.output);
+    if (!entry) return;
+    if (this.#state.entries.length >= QUEUE_LIMIT) { this.notify("Remove a file before adding a version."); return; }
+    this.add([{ file: entry.file, path: entry.path }]);
+    const version = this.#state.entries.at(-1);
+    if (version) this.select(version.id);
+    this.notify("Original queued again. Adjust settings and start the batch.");
+  }
+
   start(settings: Settings) {
     if (this.#state.run !== "idle" || !this.#state.entries.some(entry => entry.status === "ready")) return;
     this.#settings = { ...settings };
