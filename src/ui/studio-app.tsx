@@ -80,10 +80,11 @@ export function StudioApp() {
     <BrandBar><Button size="icon" variant="ghost" onClick={toggleTheme} aria-label="Toggle color theme">{theme === "dark" ? <Sun size={18} /> : <Moon size={18} />}</Button></BrandBar>
     <main className="studio-wrap" id="main">
       <div className="workspace-heading">
-        <div><p className="eyebrow"><span /> IMAGE WORKSPACE</p><h1>Image studio</h1>
-          <p>Resize, enhance, and convert a whole batch in your browser.</p></div>
+        <div><p className="eyebrow">PixelForge / Workbench</p><h1>Image <em>studio</em></h1>
+          <p>Prepare a batch, inspect the proof, and export your files.</p></div>
         <a className="help-link" href="#privacy"><CircleHelp size={16} /> Privacy &amp; compatibility</a>
       </div>
+      <nav className="bench-nav" aria-label="Workspace sections"><a href="#light-table">Light table</a><a href="#inspector">Inspector</a><a href="#batch-export">Export</a><a href="#image-queue">Queue <span>{state.entries.length}</span></a></nav>
       <div className="workspace">
         <div className="workspace-main">
           <IntakePanel add={files => studio.add(files)} notify={message => studio.notify(message)} />
@@ -92,7 +93,7 @@ export function StudioApp() {
         </div>
         <div className="workspace-side">
           <SettingsPanel input={selected?.input} settings={settings} change={preferences} capabilities={state.capabilities} locked={active} />
-          <section className="panel batch" aria-label="Batch actions">
+          <section id="batch-export" className="panel batch" aria-label="Batch actions">
             <div className="panel-heading"><Archive size={17} /><h2>Batch &amp; export</h2></div>
             <div className="batch-body">
               <div className="batch-info" aria-live="polite">

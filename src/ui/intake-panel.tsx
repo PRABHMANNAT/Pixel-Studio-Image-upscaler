@@ -43,9 +43,9 @@ export function IntakePanel({ add, notify }: { add: (files: IntakeFile[]) => voi
       onDragLeave={event => { event.preventDefault(); if (--depth.current <= 0) { depth.current = 0; setHover(false); } }}
       onDrop={drop}>
       <div className="drop-icon"><ImagePlus size={26} aria-hidden="true" /></div>
-      <h2>Drop images or folders here</h2>
-      <p>Paste an image or add JPG, PNG, WebP or AVIF files up to 48 MiB</p>
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className="drop-copy"><h2>Drop images or folders</h2>
+      <p>Paste an image or add JPG, PNG, WebP or AVIF files up to 48 MiB.</p></div>
+      <div className="intake-actions">
         <Button variant="primary" onClick={() => files.current?.click()}><Upload size={16} /> Select images</Button>
         <Button onClick={() => folder.current?.click()}><FolderOpen size={17} /> Select Folder</Button>
       </div>

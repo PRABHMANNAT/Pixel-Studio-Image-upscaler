@@ -21,7 +21,7 @@ export function QueuePanel({ entries, selected, select, remove, newVersion, lock
     (filter === "all" || entry.status === filter || (filter === "attention" && ["failed", "cancelled"].includes(entry.status))));
   if (order === "name") visible.sort((a, b) => a.path.localeCompare(b.path));
   if (order === "size") visible.sort((a, b) => b.file.size - a.file.size);
-  return <section className="panel queue" aria-label="Image queue">
+  return <section id="image-queue" className="panel queue" aria-label="Image queue">
     <div className="panel-heading"><List size={18} /><h2>Image queue</h2><span className="count">{entries.length}</span></div>
     {entries.length > 0 && <div className="queue-controls">
       <input type="search" aria-label="Search filenames" placeholder="Find a file…" value={query} onChange={e => setQuery(e.target.value)} />

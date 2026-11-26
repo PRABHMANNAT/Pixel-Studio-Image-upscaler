@@ -26,8 +26,8 @@ export function Preview({ entry, addSample }: { entry?: Entry; addSample: () => 
     event.currentTarget.setPointerCapture(event.pointerId);
     drag.current = { x: event.clientX - pan.x, y: event.clientY - pan.y };
   }
-  return <section className="panel preview" aria-label="Image preview">
-    <div className="panel-heading"><ScanLine size={18} /><h2>Preview</h2>
+  return <section id="light-table" className="panel preview" aria-label="Image preview">
+    <div className="panel-heading"><ScanLine size={18} /><h2>Light table</h2>
       {entry?.input && <div className="preview-tools">
         <Button variant="ghost" size="icon" aria-label="Zoom out" disabled={zoom === 1} onClick={() => zoomTo(Math.max(1, zoom - 0.25))}><ZoomOut size={16} /></Button>
         <span>{Math.round(zoom * 100)}%</span>

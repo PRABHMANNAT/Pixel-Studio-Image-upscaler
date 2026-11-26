@@ -9,6 +9,7 @@ const headers = Object.fromEntries(config.headers.find(rule => rule.source === "
 const types = new Map([
   [".html", "text/html; charset=utf-8"], [".css", "text/css; charset=utf-8"],
   [".js", "text/javascript; charset=utf-8"], [".mjs", "text/javascript; charset=utf-8"],
+  [".jpg", "image/jpeg"], [".woff2", "font/woff2"], [".woff", "font/woff"],
   [".txt", "text/plain; charset=utf-8"], [".svg", "image/svg+xml"], [".wasm", "application/wasm"],
 ]);
 const port = Number(process.argv[2] ?? 3000);

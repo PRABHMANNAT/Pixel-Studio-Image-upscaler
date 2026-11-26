@@ -16,8 +16,8 @@ export function SettingsPanel({ settings, change, capabilities, locked, input }:
   input?: { width: number; height: number }; settings: Settings; change: (value: Settings) => void; capabilities?: { formats: Format[]; gpu: boolean } | null; locked: boolean;
 }) {
   const patch = (values: Partial<Settings>) => change({ ...settings, ...values });
-  return <aside className="panel settings">
-    <div className="panel-heading"><SlidersHorizontal size={17} /><h2>Processing settings</h2></div>
+  return <aside className="panel settings" id="inspector">
+    <div className="panel-heading"><SlidersHorizontal size={17} /><h2>Inspector</h2></div>
     <fieldset disabled={locked}>
       <legend className="sr-only">Processing settings</legend>
       <RecipeControls settings={settings} change={change} />

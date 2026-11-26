@@ -1,5 +1,9 @@
 import type { Metadata } from "next";
+import "@fontsource/barlow-condensed/latin-700.css";
+import "@fontsource/dm-sans/latin-400.css";
+import "@fontsource/dm-sans/latin-700.css";
 import "./globals.css";
+import "./workbench.css";
 
 export const metadata: Metadata = {
   title: { default: "PixelForge Studio", template: "%s | PixelForge Studio" },
