@@ -105,6 +105,13 @@ a { color: inherit; text-decoration: none; }
 .preview-surface[data-ground="dark"] { background: black; }
 .proof-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; padding: 8px 14px 0; }
 .proof-controls label { display: flex; align-items: center; gap: 6px; font-size: .85rem; }
+.scope { padding: 10px 14px; border-top: 1px solid var(--line); font-size: .88rem; }
+.scope summary, .inspector-fold summary { cursor: pointer; }
+.scope label, .scope-axis { display: flex; justify-content: space-between; align-items: center; }
+.scope label { margin-block: 10px; }
+.scope-axis { font: 12px ui-monospace, monospace; color: var(--sub); }
+.histogram-plot { display: flex; align-items: end; height: 64px; gap: 2px; border-bottom: 1px solid var(--line); }
+.histogram-plot i { flex: 1; background: var(--accent); }
 .preview-surface.panning { cursor: grab; touch-action: none; }
 .preview-surface.panning:active { cursor: grabbing; }
 .divider { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; pointer-events: none; box-shadow: 0 0 5px #0008; }

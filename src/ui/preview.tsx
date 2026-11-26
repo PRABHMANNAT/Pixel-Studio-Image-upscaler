@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element -- Local object URLs are never sent to an image optimization server. */
+import { Histogram } from "./histogram";
 import { sample } from "../client/sample";
 import { ScanLine, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
 import { useRef, useState, type PointerEvent } from "react";
@@ -85,6 +86,7 @@ export function Preview({ entry, addSample }: { entry?: Entry; addSample: () => 
         <span>Original: {entry.input.width} × {entry.input.height} · {bytes(entry.file.size)}</span>
         {entry.output && <span>Output: {entry.output.width} × {entry.output.height} · {bytes(entry.output.blob.size)}</span>}
       </div>
+      <Histogram source={entry.input.preview} output={entry.output?.preview} />
     </>}
   </section>;
 }
