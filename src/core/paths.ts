@@ -30,10 +30,15 @@ export function uniquePath(path: string, used: Set<string>): string {
   const safe = safePath(path);
   const dot = safe.lastIndexOf(".");
   const split = dot > safe.lastIndexOf("/") + 1 ? dot : safe.length;
-  const prefix = safe.slice(0, split);
+  const directory = safe.slice(0, safe.lastIndexOf("/") + 1);
+  const stem = safe.slice(directory.length, split);
   const extension = safe.slice(split);
   let candidate = safe;
-  for (let i = 2; used.has(candidate.toLowerCase()); i++) candidate = prefix + " (" + i + ")" + extension;
+  for (let i = 2; used.has(candidate.toLowerCase()); i++) {
+    const number = " (" + i + ")";
+    const prefix = [...stem].slice(0, Math.max(1, 150 - number.length - extension.length)).join("");
+    candidate = directory + prefix + number + extension;
+  }
   used.add(candidate.toLowerCase());
   return candidate;
 }

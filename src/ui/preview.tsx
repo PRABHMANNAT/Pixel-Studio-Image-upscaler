@@ -37,7 +37,7 @@ export function Preview({ entry, addSample }: { entry?: Entry; addSample: () => 
     </div>
     {!entry?.input ? <div className="preview-empty">
       <img className="sample-frame" src={sample.url} alt="The orange wings and blue core of the Butterfly Nebula" />
-      <div className="sample-caption"><span className="micro">Sample negative · {sample.catalog}</span>
+      <div className="sample-caption"><span className="micro">Sample image · {sample.catalog}</span>
         <strong>{sample.title}</strong>
         <Button disabled={loadingSample} onClick={async () => { setLoadingSample(true); try { await addSample(); } finally { setLoadingSample(false); } }}>{loadingSample ? "Loading sample…" : "Use sample image"}</Button>
         <a href={sample.source}>{sample.credit}</a>

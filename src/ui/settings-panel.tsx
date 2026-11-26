@@ -26,7 +26,7 @@ export function SettingsPanel({ settings, change, capabilities, locked, input }:
         <label className="mode"><input type="radio" name="mode" value="resize" checked={settings.mode === "resize"} onChange={() => patch({ mode: "resize" })} /><Zap size={16} /> Fast Resize</label>
         <label className="mode"><input type="radio" name="mode" value="ai" checked={settings.mode === "ai"} onChange={() => patch({ mode: "ai", ...(settings.preset === "original" ? { preset: "2x" } : {}) })} /><Sparkles size={16} /> AI Upscale</label>
       </div>
-      <p className="field-note">{settings.mode === "resize" ? "Lanczos resampling for resizing and format conversion." : "Real-ESRGAN 2× inference. The first run downloads a 64 MiB model. AI supports sources up to 3 megapixels and may be slow on CPU."}</p>
+      <p className="field-note">{settings.mode === "resize" ? (settings.sampler === "nearest" ? "Nearest-neighbor resampling keeps pixel-art edges crisp." : "Lanczos resampling for resizing and format conversion.") : "Real-ESRGAN 2× inference. The first run downloads a 64 MiB model. AI supports sources up to 3 megapixels and may be slow on CPU."}</p>
       <label className="field">Target size
         <select value={settings.preset} onChange={event => patch({ preset: event.target.value as Preset })}>
           {order.map(preset => <option key={preset} value={preset} disabled={preset === "original" && settings.mode === "ai"}>{options[preset]}</option>)}

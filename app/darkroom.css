@@ -51,7 +51,7 @@
 .lab-footer { border-top: 1px solid #bab3a4; padding: 20px 0; display: flex; flex-wrap: wrap; gap: 10px 20px; align-items: center; font-size: .875rem; }.lab-footer a { margin-left: auto; }
 @media (max-width: 760px) {
   .front-inner, .instruments { grid-template-columns: 1fr; }
-  .front-inner { padding-block: 36px; gap: 30px; }.front-copy h1 { font-size: clamp(5.2rem, 15vw, 7rem); margin-block: 18px; }
+  .front-inner { padding-block: 36px; gap: 30px; }.front-copy h1 { font-size: clamp(4.4rem, 22vw, 7rem); margin-block: 18px; }
   .launch-actions { margin: 21px 0; }.instruments { padding-block: 36px; gap: 20px; }
   .plate-image { aspect-ratio: 1.5; }
 }

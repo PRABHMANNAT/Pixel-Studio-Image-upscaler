@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { Aperture, Focus, Images, ScanLine } from "lucide-react";
 import { BrandBar } from "../src/ui/brand";
 import { ProofPlate } from "../src/ui/proof-plate";
@@ -6,7 +5,7 @@ import "./darkroom.css";
 
 export default function Home() {
   return <div className="darkroom-home">
-    <BrandBar><a className="header-link" href="#instruments">Tools</a><Link className="nav-launch" href="/studio/">Open studio</Link></BrandBar>
+    <BrandBar><a className="header-link" href="#instruments">Tools</a><a className="nav-launch" href="/studio/">Open studio</a></BrandBar>
     <main id="main">
       <section className="frontispiece">
         <div className="front-inner">
@@ -14,8 +13,8 @@ export default function Home() {
             <div className="lab-kicker"><span aria-hidden="true" /> Browser-based image lab</div>
             <h1>Digital<br /><em>darkroom.</em></h1>
             <p>Enlarge, grade, and proof your images. A private workbench for a single frame or an entire folder.</p>
-            <div className="launch-actions"><Link className="launch-main" href="/studio/"><Aperture size={20} /> Open image studio</Link>
-              <Link className="launch-sample" href="/studio/?sample=nebula">Try the sample</Link></div>
+            <div className="launch-actions"><a className="launch-main" href="/studio/"><Aperture size={20} /> Open image studio</a>
+              <a className="launch-sample" href="/studio/?sample=nebula">Try the sample</a></div>
             <div className="format-strip" aria-label="Supported formats"><span>Accepts</span> JPG <i /> PNG <i /> WEBP <i /> AVIF</div>
           </div>
           <ProofPlate />

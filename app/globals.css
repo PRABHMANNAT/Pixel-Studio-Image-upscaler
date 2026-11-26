@@ -98,8 +98,8 @@ a { color: inherit; text-decoration: none; }
 .preview-empty strong { margin-top: 8px; font-size: 14px; }
 .preview-surface { height: clamp(205px, 33vw, 415px); position: relative; overflow: hidden; border-radius: 8px; margin: 12px 12px 0; isolation: isolate; }
 .preview-layer, .preview-mask { position: absolute; inset: 0; }
-.preview-layer { display: grid; place-items: center; }
-.preview-layer img { width: 100%; height: 100%; object-fit: contain; user-select: none; }
+.preview-layer { overflow: visible; }
+.preview-layer img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; user-select: none; }
 .preview-mask { background: inherit; }
 .preview-surface[data-ground="light"] { background: white; }
 .preview-surface[data-ground="dark"] { background: black; }
