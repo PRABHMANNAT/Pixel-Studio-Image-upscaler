@@ -72,7 +72,7 @@ export function StudioApp() {
           <QueuePanel entries={state.entries} selected={state.selected} select={id => studio.select(id)} remove={id => studio.remove(id)} />
         </div>
         <div className="workspace-side">
-          <SettingsPanel settings={settings} change={preferences} capabilities={state.capabilities} locked={active} />
+          <SettingsPanel input={selected?.input} settings={settings} change={preferences} capabilities={state.capabilities} locked={active} />
           <section className="panel batch" aria-label="Batch actions">
             <div className="panel-heading"><Archive size={17} /><h2>Batch &amp; export</h2></div>
             <div className="batch-body">

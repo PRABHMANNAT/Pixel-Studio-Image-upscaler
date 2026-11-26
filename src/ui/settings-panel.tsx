@@ -1,3 +1,4 @@
+import { OutputPlan } from "./output-plan";
 import { RecipeControls } from "./recipe-controls";
 import { ToneControls } from "./tone-controls";
 import { FramingControls } from "./framing-controls";
@@ -11,8 +12,8 @@ const options: Record<Preset, string> = {
 };
 const order: Preset[] = ["original", "2x", "4x", "2k", "4k", "4096", "custom"];
 
-export function SettingsPanel({ settings, change, capabilities, locked }: {
-  settings: Settings; change: (value: Settings) => void; capabilities?: { formats: Format[]; gpu: boolean } | null; locked: boolean;
+export function SettingsPanel({ settings, change, capabilities, locked, input }: {
+  input?: { width: number; height: number }; settings: Settings; change: (value: Settings) => void; capabilities?: { formats: Format[]; gpu: boolean } | null; locked: boolean;
 }) {
   const patch = (values: Partial<Settings>) => change({ ...settings, ...values });
   return <aside className="panel settings">
@@ -56,6 +57,7 @@ export function SettingsPanel({ settings, change, capabilities, locked }: {
       <label className="check"><input type="checkbox" checked={settings.jpegMatte} onChange={e => patch({ jpegMatte: e.target.checked })} /> Allow background for JPG</label>
       {settings.jpegMatte && <label className="check">Matte color <input type="color" value={settings.matteColor} onChange={e => patch({ matteColor: e.target.value })} /> {settings.matteColor}</label>}
     </fieldset>
+    <OutputPlan input={input} settings={settings} />
     <div className="capability"><Cpu size={16} /><span>{capabilities === null ? "Browser capability check failed" : capabilities ? capabilities.gpu ? "WebGPU detected · WASM fallback" : "CPU inference via WebAssembly" : "Checking browser capabilities…"}</span></div>
   </aside>;
 }
