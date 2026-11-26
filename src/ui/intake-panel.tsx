@@ -1,7 +1,7 @@
 "use client";
 
 import { FolderOpen, ImagePlus, Upload } from "lucide-react";
-import { useRef, useState, type DragEvent } from "react";
+import { useEffect, useRef, useState, type DragEvent } from "react";
 import { captureDrop, picked, type IntakeFile } from "../client/intake";
 import { Button } from "./button";
 
@@ -10,6 +10,19 @@ export function IntakePanel({ add, notify }: { add: (files: IntakeFile[]) => voi
   const folder = useRef<HTMLInputElement>(null);
   const depth = useRef(0);
   const [hover, setHover] = useState(false);
+  useEffect(() => {
+    function paste(event: ClipboardEvent) {
+      const target = event.target;
+      if (target instanceof HTMLElement && target.closest('input, textarea, [contenteditable="true"]')) return;
+      const images = Array.from(event.clipboardData?.files ?? []).filter(file => file.type.startsWith("image/"));
+      if (!images.length) return;
+      event.preventDefault();
+      add(images.map(file => ({ file, path: file.name })));
+    }
+    window.addEventListener("paste", paste);
+    return () => window.removeEventListener("paste", paste);
+  }, [add]);
+
   async function drop(event: DragEvent<HTMLDivElement>) {
     event.preventDefault();
     const collect = captureDrop(event.dataTransfer);
@@ -31,7 +44,7 @@ export function IntakePanel({ add, notify }: { add: (files: IntakeFile[]) => voi
       onDrop={drop}>
       <div className="drop-icon"><ImagePlus size={26} aria-hidden="true" /></div>
       <h2>Drop images or folders here</h2>
-      <p>JPG, PNG, WebP or AVIF · up to 48 MiB per image</p>
+      <p>Paste an image or add JPG, PNG, WebP or AVIF files up to 48 MiB</p>
       <div className="flex flex-wrap justify-center gap-2">
         <Button variant="primary" onClick={() => files.current?.click()}><Upload size={16} /> Select images</Button>
         <Button onClick={() => folder.current?.click()}><FolderOpen size={17} /> Select Folder</Button>
