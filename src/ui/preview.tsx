@@ -9,6 +9,8 @@ import { Button } from "./button";
 export function Preview({ entry, addSample }: { entry?: Entry; addSample: () => Promise<void> }) {
   const [loadingSample, setLoadingSample] = useState(false);
   const [split, setSplit] = useState(50);
+  const [view, setView] = useState("split");
+  const [ground, setGround] = useState("checker");
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const drag = useRef<{ x: number; y: number } | null>(null);
@@ -40,7 +42,15 @@ export function Preview({ entry, addSample }: { entry?: Entry; addSample: () => 
         <a href={sample.source}>{sample.credit}</a>
       </div>
     </div> : <>
-      <div className={"preview-surface" + (zoom > 1 ? " panning" : "")}
+      <div className="proof-controls">
+        {entry.output && <label>View <select aria-label="Comparison view" value={view} onChange={e => setView(e.target.value)}>
+          <option value="split">Split comparison</option><option value="original">Original only</option><option value="output">Output only</option>
+        </select></label>}
+        <label>Backdrop <select aria-label="Preview backdrop" value={ground} onChange={e => setGround(e.target.value)}>
+          <option value="checker">Checkerboard</option><option value="light">White</option><option value="dark">Black</option>
+        </select></label>
+      </div>
+      <div data-ground={ground} className={"preview-surface" + (zoom > 1 ? " panning" : "")}
         tabIndex={zoom > 1 ? 0 : undefined} role="group"
         aria-label={zoom > 1 ? "Zoomed image. Use the arrow keys to pan." : "Image comparison"}
         onKeyDown={event => {
@@ -58,9 +68,9 @@ export function Preview({ entry, addSample }: { entry?: Entry; addSample: () => 
         }}
         onPointerUp={() => { drag.current = null; }} onPointerCancel={() => { drag.current = null; }}>
         <div className="preview-layer" style={{ transform: "translate(" + pan.x + "px," + pan.y + "px) scale(" + zoom + ")" }}>
-          <img draggable={false} src={entry.input.preview} alt="Original preview" />
+          <img draggable={false} src={view === "output" && entry.output ? entry.output.preview : entry.input.preview} alt={view === "output" && entry.output ? "Processed preview" : "Original preview"} />
         </div>
-        {entry.output && <>
+        {entry.output && view === "split" && <>
           <div className="preview-mask" style={{ clipPath: "inset(0 0 0 " + split + "%)" }}>
             <div className="preview-layer" style={{ transform: "translate(" + pan.x + "px," + pan.y + "px) scale(" + zoom + ")" }}>
               <img draggable={false} src={entry.output.preview} alt="Processed preview" />

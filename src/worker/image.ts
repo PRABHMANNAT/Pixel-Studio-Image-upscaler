@@ -108,6 +108,8 @@ export async function processImage(file: File, settings: Settings, report: Progr
     ctx.putImageData(image, 0, 0);
     report(0.94, "Encoding output");
     const blob = await encode(canvas, image, type, settings.quality);
-    return { ...target, format: type, blob, preview: await preview(canvas, 1600), provider };
+    const encoded = await createImageBitmap(blob);
+    try { return { ...target, format: type, blob, preview: await preview(encoded, 1600), provider }; }
+    finally { encoded.close(); }
   } finally { canvas.width = canvas.height = 1; }
 }
