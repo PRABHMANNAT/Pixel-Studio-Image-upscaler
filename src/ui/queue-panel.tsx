@@ -1,4 +1,5 @@
 /* eslint-disable @next/next/no-img-element -- Thumbnails use browser-local object URLs. */
+import { useState } from "react";
 import { Download, Images, List, X } from "lucide-react";
 import { bytes, formatName } from "../core/display";
 import { leaf } from "../core/paths";
@@ -13,10 +14,27 @@ const statusNames: Record<Status, string> = {
 export function QueuePanel({ entries, selected, select, remove }: {
   entries: Entry[]; selected?: string; select: (id: string) => void; remove: (id: string) => void;
 }) {
+  const [query, setQuery] = useState("");
+  const [filter, setFilter] = useState("all");
+  const [order, setOrder] = useState("import");
+  const visible = entries.filter(entry => entry.path.toLowerCase().includes(query.trim().toLowerCase()) &&
+    (filter === "all" || entry.status === filter || (filter === "attention" && ["failed", "cancelled"].includes(entry.status))));
+  if (order === "name") visible.sort((a, b) => a.path.localeCompare(b.path));
+  if (order === "size") visible.sort((a, b) => b.file.size - a.file.size);
   return <section className="panel queue" aria-label="Image queue">
     <div className="panel-heading"><List size={18} /><h2>Image queue</h2><span className="count">{entries.length}</span></div>
+    {entries.length > 0 && <div className="queue-controls">
+      <input type="search" aria-label="Search filenames" placeholder="Find a file…" value={query} onChange={e => setQuery(e.target.value)} />
+      <select aria-label="Filter queue" value={filter} onChange={e => setFilter(e.target.value)}>
+        <option value="all">All statuses</option><option value="ready">Ready to run</option><option value="done">Finished files</option><option value="attention">Needs attention</option>
+      </select>
+      <select aria-label="Sort queue" value={order} onChange={e => setOrder(e.target.value)}>
+        <option value="import">Import order</option><option value="name">Filename A–Z</option><option value="size">Largest first</option>
+      </select>
+    </div>}
+    {entries.length > 0 && !visible.length && <p className="queue-empty">No matching files. Change the search or status filter.</p>}
     {entries.length ? <ul className="queue-list">
-      {entries.map(entry => <li key={entry.id} className={entry.id === selected ? "queue-row queue-selected" : "queue-row"}>
+      {visible.map(entry => <li key={entry.id} className={entry.id === selected ? "queue-row queue-selected" : "queue-row"}>
         <button type="button" className="queue-select" onClick={() => select(entry.id)} aria-pressed={selected === entry.id}>
           <span className="thumbnail">{entry.input ? <img src={entry.input.thumbnail} alt="" /> : <Images size={18} />}</span>
           <span className="queue-name"><strong title={entry.path}>{leaf(entry.path)}</strong>
