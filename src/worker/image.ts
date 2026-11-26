@@ -1,3 +1,4 @@
+import { cropRect } from "../core/framing";
 import { inspectBytes } from "../core/format";
 import { lanczos, sharpenPixels } from "../core/resize";
 import { assertDimensions, MAX_INPUT_BYTES, targetSize, type Dimensions, type Settings } from "../core/settings";
@@ -48,7 +49,8 @@ export async function inspect(file: File): Promise<Inspection> {
 export async function processImage(file: File, settings: Settings, report: Progress): Promise<Product> {
   report(0.02, "Decoding source");
   const { bitmap, format } = await decoded(file);
-  const source: Dimensions = { width: bitmap.width, height: bitmap.height };
+  const crop = cropRect(bitmap, settings.crop);
+  const source: Dimensions = { width: crop.width, height: crop.height };
   let raw: Uint8ClampedArray;
   let target: Dimensions;
   const type = settings.format === "original" ? format : settings.format;
@@ -60,7 +62,7 @@ export async function processImage(file: File, settings: Settings, report: Progr
       throw new Error("AI Upscale needs a larger target. Use Fast Resize for conversion at the original size.");
     }
     const original = surface(source.width, source.height);
-    original.ctx.drawImage(bitmap, 0, 0);
+    original.ctx.drawImage(bitmap, crop.x, crop.y, crop.width, crop.height, 0, 0, crop.width, crop.height);
     raw = original.ctx.getImageData(0, 0, source.width, source.height).data;
     original.canvas.width = original.canvas.height = 1;
   } finally { bitmap.close(); }

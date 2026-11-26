@@ -4,6 +4,7 @@ export type Dimensions = { width: number; height: number };
 export const presets = ["original", "2x", "4x", "2k", "4k", "4096", "custom"] as const;
 export type Preset = (typeof presets)[number];
 export type Settings = {
+  crop: "source" | "1:1" | "4:5" | "3:2" | "16:9";
   mode: "resize" | "ai";
   preset: Preset;
   format: Format | "original";
@@ -16,6 +17,7 @@ export type Settings = {
   jpegMatte: boolean;
 };
 export const defaults: Settings = {
+  crop: "source",
   mode: "resize", preset: "2x", format: "original", quality: 0.92,
   width: 1920, height: 1080, lock: true, allowDownscale: false, sharpen: false, jpegMatte: false,
 };
@@ -68,6 +70,7 @@ export function restoreSettings(raw: string | null): Settings {
     const s = JSON.parse(raw) as Partial<Settings>;
     const dimension = (n: unknown, fallback: number) => typeof n === "number" && Number.isInteger(n) && n > 0 && n <= MAX_SIDE ? n : fallback;
     return {
+      crop: s.crop && ["1:1", "4:5", "3:2", "16:9"].includes(s.crop) ? s.crop : "source",
       mode: s.mode === "ai" ? "ai" : "resize",
       preset: presets.includes(s.preset as Preset) ? s.preset! : defaults.preset,
       format: s.format && formats.includes(s.format as Format) ? s.format : defaults.format,

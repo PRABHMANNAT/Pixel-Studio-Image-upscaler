@@ -1,3 +1,4 @@
+import { FramingControls } from "./framing-controls";
 import { Cpu, SlidersHorizontal, Sparkles, Zap } from "lucide-react";
 import { formatName } from "../core/display";
 import { formats, MAX_SIDE, type Format, type Preset, type Settings } from "../core/settings";
@@ -46,6 +47,7 @@ export function SettingsPanel({ settings, change, capabilities, locked }: {
         <input type="range" min="0.1" max="1" step="0.01" value={settings.quality} disabled={settings.format === "image/png"} onChange={e => patch({ quality: Number(e.target.value) })} />
       </label>
       <p className="field-note">Quality applies to lossy formats. PNG stays lossless.</p>
+      <FramingControls settings={settings} patch={patch} />
       <label className="check"><input type="checkbox" checked={settings.sharpen} onChange={e => patch({ sharpen: e.target.checked })} /> Sharpen opaque details</label>
       <label className="check"><input type="checkbox" checked={settings.jpegMatte} onChange={e => patch({ jpegMatte: e.target.checked })} /> Allow white background for JPG</label>
     </fieldset>
