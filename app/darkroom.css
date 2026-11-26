@@ -38,6 +38,10 @@
 .plate-swatches { display: flex; }.plate-swatches i { width: 12px; height: 14px; background: #705141; }
 .plate-swatches i:nth-child(2) { background: #d6784b; }.plate-swatches i:nth-child(3) { background: #f6b88f; }
 .plate-swatches i:nth-child(4) { background: #d7dbe6; }.plate-swatches i:nth-child(5) { background: #7395ad; }
+.optical-glass { position: absolute; z-index: 2; top: 48%; left: 52%; transform: translate(-50%, -50%); border-radius: 50%; pointer-events: none; box-shadow: 0 0 0 2px #fff5dc, 0 0 0 5px #24211d, 0 5px 12px #0009; overflow: hidden; }
+.optical-glass canvas { width: 100%; height: 100%; }.optical-glass span { position: absolute; bottom: 4px; left: 44%; padding: 1px 4px; background: #181815; color: #fff5df; font: 12px monospace; }
+.loupe-switch { position: absolute; right: 17px; bottom: 17px; z-index: 3; display: flex; align-items: center; gap: 7px; font-weight: 650; font-size: .875rem; padding: 8px 12px; background: #1e1c19ee; color: #f9f1e7; border: 1px solid #f9f1e799; cursor: pointer; border-radius: 3px; }
+.loupe-switch[aria-pressed="true"] { border-color: var(--orange); color: var(--orange); }
 .plate-credit { display: inline-block; color: #bfbcb3; margin-top: 6px; font-size: .75rem; }
 .instruments { display: grid; grid-template-columns: .87fr 1fr; gap: clamp(32px, 6vw, 95px); padding-block: 54px 64px; }
 .instrument-intro .micro { color: #935132; }.instrument-intro h2 { font: 700 clamp(2.2rem, 4.2vw, 4rem)/1 "Barlow Condensed", Impact, sans-serif; letter-spacing: -.03em; margin-top: 10px; }
