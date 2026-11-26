@@ -51,7 +51,8 @@ export function SettingsPanel({ settings, change, capabilities, locked }: {
       <FramingControls settings={settings} patch={patch} />
       <ToneControls settings={settings} patch={patch} />
       <label className="check"><input type="checkbox" checked={settings.sharpen} onChange={e => patch({ sharpen: e.target.checked })} /> Sharpen opaque details</label>
-      <label className="check"><input type="checkbox" checked={settings.jpegMatte} onChange={e => patch({ jpegMatte: e.target.checked })} /> Allow white background for JPG</label>
+      <label className="check"><input type="checkbox" checked={settings.jpegMatte} onChange={e => patch({ jpegMatte: e.target.checked })} /> Allow background for JPG</label>
+      {settings.jpegMatte && <label className="check">Matte color <input type="color" value={settings.matteColor} onChange={e => patch({ matteColor: e.target.value })} /> {settings.matteColor}</label>}
     </fieldset>
     <div className="capability"><Cpu size={16} /><span>{capabilities === null ? "Browser capability check failed" : capabilities ? capabilities.gpu ? "WebGPU detected · WASM fallback" : "CPU inference via WebAssembly" : "Checking browser capabilities…"}</span></div>
   </aside>;

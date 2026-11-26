@@ -73,7 +73,7 @@ export async function processImage(file: File, settings: Settings, report: Progr
 
   if (type === "image/jpeg" && !settings.jpegMatte) {
     for (let i = 3; i < raw.length; i += 4) {
-      if (raw[i] !== 255) throw new Error("JPEG cannot preserve transparency. Choose PNG/WebP or enable the white JPEG background.");
+      if (raw[i] !== 255) throw new Error("JPEG cannot preserve transparency. Choose PNG/WebP or enable a JPEG background.");
     }
   }
 
@@ -96,9 +96,10 @@ export async function processImage(file: File, settings: Settings, report: Progr
   const { canvas, ctx } = surface(target.width, target.height);
   // Compositing explicitly avoids browser-dependent handling of transparent JPEG input.
   if (type === "image/jpeg" && settings.jpegMatte) {
+    const rgb = [1, 3, 5].map(start => parseInt(settings.matteColor.slice(start, start + 2), 16));
     for (let i = 0; i < pixels.length; i += 4) {
       const alpha = pixels[i + 3] / 255;
-      for (let c = 0; c < 3; c++) pixels[i + c] = pixels[i + c] * alpha + 255 * (1 - alpha);
+      for (let c = 0; c < 3; c++) pixels[i + c] = pixels[i + c] * alpha + rgb[c] * (1 - alpha);
       pixels[i + 3] = 255;
     }
   }
