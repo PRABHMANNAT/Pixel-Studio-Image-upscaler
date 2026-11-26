@@ -1,3 +1,4 @@
+import { adjustTone } from "../core/tone";
 import { cropRect, rotatedSize } from "../core/framing";
 import { inspectBytes } from "../core/format";
 import { lanczos, sharpenPixels } from "../core/resize";
@@ -86,6 +87,7 @@ export async function processImage(file: File, settings: Settings, report: Progr
   }
   report(settings.mode === "ai" ? 0.83 : 0.35, "Resampling image");
   let pixels = lanczos(raw, inputSize, target, () => report(0.85, "Finishing resize"));
+  adjustTone(pixels, settings);
   if (settings.sharpen) {
     report(0.88, "Sharpening opaque pixels");
     pixels = sharpenPixels(pixels, target);
