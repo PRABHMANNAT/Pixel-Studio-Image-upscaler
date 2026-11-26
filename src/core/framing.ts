@@ -9,3 +9,9 @@ export function cropRect(source: Dimensions, crop: Settings["crop"]) {
   }
   return { width, height, x: Math.floor((source.width - width) / 2), y: Math.floor((source.height - height) / 2) };
 }
+
+export function rotatedSize(size: Dimensions, rotation: Settings["rotation"]): Dimensions {
+  return rotation === 90 || rotation === 270
+    ? { width: size.height, height: size.width }
+    : { width: size.width, height: size.height };
+}

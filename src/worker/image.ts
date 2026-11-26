@@ -1,4 +1,4 @@
-import { cropRect } from "../core/framing";
+import { cropRect, rotatedSize } from "../core/framing";
 import { inspectBytes } from "../core/format";
 import { lanczos, sharpenPixels } from "../core/resize";
 import { assertDimensions, MAX_INPUT_BYTES, targetSize, type Dimensions, type Settings } from "../core/settings";
@@ -50,7 +50,7 @@ export async function processImage(file: File, settings: Settings, report: Progr
   report(0.02, "Decoding source");
   const { bitmap, format } = await decoded(file);
   const crop = cropRect(bitmap, settings.crop);
-  const source: Dimensions = { width: crop.width, height: crop.height };
+  const source = rotatedSize(crop, settings.rotation);
   let raw: Uint8ClampedArray;
   let target: Dimensions;
   const type = settings.format === "original" ? format : settings.format;
@@ -62,7 +62,10 @@ export async function processImage(file: File, settings: Settings, report: Progr
       throw new Error("AI Upscale needs a larger target. Use Fast Resize for conversion at the original size.");
     }
     const original = surface(source.width, source.height);
-    original.ctx.drawImage(bitmap, crop.x, crop.y, crop.width, crop.height, 0, 0, crop.width, crop.height);
+    original.ctx.translate(source.width / 2, source.height / 2);
+    original.ctx.scale(settings.mirror ? -1 : 1, 1);
+    original.ctx.rotate(settings.rotation * Math.PI / 180);
+    original.ctx.drawImage(bitmap, crop.x, crop.y, crop.width, crop.height, -crop.width / 2, -crop.height / 2, crop.width, crop.height);
     raw = original.ctx.getImageData(0, 0, source.width, source.height).data;
     original.canvas.width = original.canvas.height = 1;
   } finally { bitmap.close(); }
